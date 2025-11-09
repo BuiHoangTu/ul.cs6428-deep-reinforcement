@@ -1,152 +1,170 @@
-# Hybrid MobileNetV3: Impact of Activation Tuning and Feature Extractions
+# 🧠 CS6482 Deep Reinforcement Learning Projects
 
 **Author:** Hoang Tu Bui (24005665)  
-**Course:** CS6482 - Deep Reinforcement Learning  
+**Course:** CS6482 – Deep Reinforcement Learning  
 **Supervisor:** J.J. Collins  
-**Program:** Masters in Artificial Intelligence and Machine Learning (Semester 2)
+**Program:** Masters in Artificial Intelligence and Machine Learning
 
 ---
 
-📄 **[Read the Full PDF Report](a1/CS6482-Assign1-24005665-24089036.pdf)**
+## 📘 Projects Overview
+
+This repository contains two major coursework projects for CS6482, focusing on deep learning and reinforcement learning methodologies.  
+
+| Project | Title | Description |
+|----------|--------|-------------|
+| [A1](#-project-a1-hybrid-mobilenetv3) | **Hybrid MobileNetV3: Impact of Activation Tuning and Feature Extractions** | Exploring MobileNetV3 enhancements using hybrid feature extraction and activation tuning for satellite image classification. |
+| [A2](#-project-a2-deep-q-learning-on-atari-breakout) | **Deep Q-Learning and Double DQN for Atari Breakout** | Implementing and comparing DQN and Double DQN agents in the Atari Breakout environment with additional RL optimizations. |
 
 ---
 
-## 🧠 Overview
+## 🧩 Project 1: MobileNetV3
 
-This project explores the architecture of **MobileNetV3**, a lightweight and efficient convolutional neural network, and its application to the **EuroSAT-RGB** satellite imagery dataset.  
-We focus on understanding MobileNetV3’s efficiency and on enhancing it using:
+📄 **[Read Full Report (PDF)](/a1/CS6482-Assign1-24005665-24089036.pdf)**  
 
-- **Hybrid feature extraction** (combining traditional and deep features)  
-- **Activation function tuning** (GELU, LeakyReLU, ELU, Hard ELU)
+### Overview
 
-The hybrid model integrates **Sobel filtering** and **Histogram of Oriented Gradients (HOG)** features with deep representations to test whether handcrafted and learned features can complement each other.
+This project explores the architecture of **MobileNetV3**, applying it to the **EuroSAT-RGB** dataset for land cover classification.  
+We test performance improvements through:
 
----
+- **Hybrid feature extraction** (Sobel filters + HOG + CNN)
+- **Activation tuning** (GELU, LeakyReLU, ELU, Hard ELU)
 
-## 🌍 Dataset: EuroSAT-RGB
+### Dataset: EuroSAT-RGB
 
-The **EuroSAT dataset** contains **27,000 RGB satellite images** captured by the Sentinel-2 mission across 34 European countries.  
-Each image has a resolution of **64×64 pixels** and belongs to one of ten classes:
-
-> Annual Crop • Forest • Herbaceous Vegetation • Highway • Industrial Buildings • Pasture • Permanent Crop • Residential Buildings • River • Sea/Lake
-
-### Data Distribution
-
-- **Training set:** 16,200 images  
-- **Validation set:** 5,400 images  
-- **Test set:** 5,400 images  
-
-Each subset maintains proportional representation across classes.
+- **27,000 RGB images** (64×64 pixels each) from 34 European countries  
+- **10 classes:** Annual Crop, Forest, Highway, River, etc.  
+- **Split:** 60% training, 20% validation, 20% test  
 
 ![Data Distribution](docs/images/data_distribution.png)
-*Dataset distribution figures:*  
-
-### Data Preprocessing & Augmentation
-
-- Resizing all images to 64×64  
-- Random horizontal/vertical flips  
-- Random rotation (±45°)  
-- Augmentations applied **only to training data**
+*Dataset distribution figures*
 
 ![Augmented Samples](docs/images/augmented_samples.png)
-*Sample augmented data:*  
+*Sample augmented data*
 
----
+### Architecture
 
-## ⚙️ Model Architecture: MobileNetV3 and Variants
-
-The project reviews and implements **MobileNetV1, V2, and V3**, focusing on their innovations:
-
-- **MobileNetV1:** Depthwise separable convolutions  
-- **MobileNetV2:** Inverted residuals and linear bottlenecks  
-- **MobileNetV3:** Hard-Swish activation, SE attention blocks, and NAS-optimized structure  
+The implementation is based on **MobileNetV3-Large**, incorporating:
+- **Depthwise separable convolutions**
+- **Squeeze-and-Excitation attention blocks**
+- **Hybrid feature fusion** of handcrafted and learned representations
 
 ![MobileNetV3 Architecture](docs/images/mobilenetv3_architecture.png)
-*Architecture diagram:*  
+*Architecture diagram*
 
-### Hybrid Feature Integration
+### Results
 
-The hybrid version enhances MobileNetV3 by fusing:
-- **SobelX/Y edge features**
-- **HOG descriptors**
-- **Deep features from CNN layers**
-
-These are merged before the classification layer to improve generalization.
-
----
-
-## 🧩 Training Setup
-
-- **Loss function:** Cross-Entropy  
-- **Optimizer:** Adam (LR = 0.001, reduced on plateau)  
-- **Early stopping** and **learning rate scheduling** implemented  
-- **Training duration:** Adaptive (based on early stopping)
+| Model | Accuracy | Macro Avg (F1) | Notes |
+|--------|-----------|----------------|-------|
+| MobileNetV3 (Baseline) | **93.94%** | 0.94 | Strong baseline |
+| Hybrid Model | 91.52% | 0.91 | Slightly lower but faster convergence |
+| GELU Activation Variant | **95.00%** | 0.92 | Best performance overall |
 
 ![Learning Curves](docs/images/learning_curve.png)
 *Learning curves*  
 
----
-
-## 🧪 Evaluation
-
-### Learning Curves
-
-Hybrid models converge faster but achieve similar accuracy to the baseline MobileNetV3.  
-Both maintain stable validation performance with minimal overfitting.
-
-### Confusion Matrix
-
-Models perform robustly across all 10 classes with balanced predictions.
-
 ![Confusion Matrix](docs/images/confusion_matrix.png)
 *Confusion matrix*  
 
-### Performance Metrics
 
-| Model | Accuracy | Macro Avg (F1) | Weighted Avg (F1) |
-|--------|-----------|----------------|-------------------|
-| **Original MobileNetV3** | **93.94%** | 0.94 | 0.94 |
-| **Hybrid Model** | 91.52% | 0.91 | 0.92 |
+### Conclusion
 
----
-
-## 🔬 Activation Function Experiments
-
-We replaced **Hard-Swish** with alternative activations to test convergence and accuracy:
-
-| Activation | Accuracy | Training Time | Epochs | Observation |
-|-------------|-----------|----------------|---------|--------------|
-| **Hard-Swish (baseline)** | 93.94% | 8m36s | 67 | Stable baseline |
-| **GELU** | **95.00%** | 12m43s | 98 | Best overall accuracy |
-| **LeakyReLU** | 91.96% | 6m51s | 55 | Fast but lower accuracy |
-| **ELU** | 93.69% | 7m29s | 59 | Fast convergence |
-| **Hard ELU** | 93.15% | 8m04s | 67 | Moderate, no improvement |
-
+- **GELU** outperformed Hard-Swish in both accuracy and convergence rate.  
+- The **hybrid model** offers better learning speed for large datasets.  
+- Future improvements include advanced feature fusion and broader datasets.
 
 ---
 
-## 🧾 Conclusion
+## 🎮 Project 2: Deep Q-Learning on Atari Breakout
 
-- **GELU** outperformed other activations, providing the best balance between convergence and accuracy.  
-- The **hybrid model** combining handcrafted and deep features performed competitively, especially in limited data or fast training scenarios.  
-- The **classical MobileNetV3** remained slightly stronger in overall accuracy.  
-- Future work: explore better feature fusion, more activation functions, and larger datasets.
+📄 **[Read Full Report](./a2/CS6482-Assign2-24005665.ipynb)**  
+
+### Overview
+
+This project implements and compares **Vanilla DQN** and **Double DQN** agents on the Atari **Breakout** environment, using **Gymnasium** and **PyTorch**.  
+We explore:
+- Stable training through Huber loss  
+- Improved generalization using Double DQN  
+- Optimization via **hyperparameter tuning** and **prioritized experience replay**
+
+### Environment
+
+🎮 **Game:** Breakout (Atari 2600)  
+🎯 **Goal:** Use the paddle to bounce the ball and break bricks.  
+🧩 **Actions:** `NOOP`, `FIRE`, `RIGHT`, `LEFT`  
+🖼️ **Observation:** 210×160 RGB frames → preprocessed to 84×84 grayscale stacks of 4 frames  
+
+![Breakout Environment](docs/images/a2_environment.png)
+
+### Implementation Highlights
+
+- **Network Input:** 4 stacked grayscale frames  
+- **Model:** 3 convolutional layers + 2 fully connected layers  
+- **Loss Function:** Huber Loss  
+- **Replay Buffer:** Experience replay with periodic target network sync  
+- **Training Devices:** CUDA / CPU fallback  
+
+*Network Architecture:*  
+```
+DQN(
+  (network): Sequential(
+    (0): Conv2d(4, 32, kernel_size=(8, 8), stride=(4, 4))
+    (1): ReLU()
+    (2): Conv2d(32, 64, kernel_size=(4, 4), stride=(2, 2))
+    (3): ReLU()
+    (4): Conv2d(64, 64, kernel_size=(3, 3), stride=(1, 1))
+    (5): ReLU()
+    (6): Flatten(start_dim=1, end_dim=-1)
+    (7): Linear(in_features=3136, out_features=512, bias=True)
+    (8): ReLU()
+    (9): Linear(in_features=512, out_features=4, bias=True)
+  )
+)
+```
+
+
+### Results
+
+#### Vanilla DQN
+- Faster early learning but unstable Q-value estimates due to overestimation.  
+- Achieved consistent improvement over episodes.
+
+![DQN Rewards](docs/images/a2_dqn_rewards.png)
+
+#### Double DQN
+- More stable learning dynamics with reduced overestimation bias.  
+- Slightly slower start, better long-term policy stability.
+
+![Double DQN Rewards](docs/images/a2_double_dqn_rewards.png)
+
+### Added Enhancements
+
+#### 🔧 Hyperparameter Optimization  
+Implemented BOHB-inspired tuning for batch size, γ, learning rate, and target update frequency.  
+Resulted in smoother convergence and improved reward consistency.
+
+#### 🧠 Prioritized Experience Replay  
+Integrated **PER** (Schaul et al., 2015) for improved sampling efficiency, focusing on transitions with high TD-error.  
+Enabled faster convergence in sparse-reward environments.
+
+![PER Results](docs/images/a2_per_rewards.png)
+
+### Discussion
+
+- **Vanilla DQN** excels in dense-reward tasks (e.g., Breakout).  
+- **Double DQN** generalizes better for noisy/sparse-reward environments.  
+- **Rainbow DQN** combines complementary enhancements (Double DQN + PER + Dueling + Multi-step + Noisy Nets) for superior stability and performance.
 
 ---
 
-## 📚 References
+## 🧾 References
 
-- Howard, A.G. et al. (2017). *MobileNets: Efficient Convolutional Neural Networks for Mobile Vision Applications.*  
-- Sandler, M. et al. (2018). *MobileNetV2: Inverted Residuals and Linear Bottlenecks.*  
-- Howard, A. et al. (2019). *Searching for MobileNetV3.*  
-- Helber, P. et al. (2017). *EuroSAT: A Novel Dataset and Deep Learning Benchmark for Land Use and Land Cover Classification.*  
-- Castro, C. (2015). *Approximation of Exp(x) Deduced from the Implicit Euler Numerical Solution of First Order Linear Differential Equations.*  
-  [View on Semantic Scholar](https://www.semanticscholar.org/paper/Approximation-of-Exp%28x%29-Deduced-from-the-Implicit-Castro/a8f379a98998501e3b32ea94e5fb85a7a9c1e6b1)
-
----
-
-🖇️ **Full Report:**  
-👉 [Download the complete PDF report](a1/CS6482-Assign1-24005665-24089036.pdf)
+**Core Papers:**
+- Mnih et al. (2015). *Human-level control through deep reinforcement learning.*  
+- van Hasselt et al. (2016). *Deep Reinforcement Learning with Double Q-Learning.*  
+- Hessel et al. (2017). *Rainbow: Combining Improvements in Deep Reinforcement Learning.*  
+- Howard et al. (2019). *Searching for MobileNetV3.*  
+- Helber et al. (2017). *EuroSAT: A Novel Dataset for Land Use and Land Cover Classification.*  
 
 ---
 
